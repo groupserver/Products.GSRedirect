@@ -1,35 +1,90 @@
 '''GroupServer Page-Redirector
 '''
-from Products.Five.traversable import Traversable
+from zope.component import getMultiAdapter, getAdapter, ComponentLookupError
 from Products.XWFMailingListManager import queries
-from interfaces import IGSRedirect
-from zope.app.traversing.interfaces import ITraversable
+from interfaces import IGSRedirectTraversal, IGSRedirect
+from zope.publisher.interfaces import IPublishTraverse
 from zope.interface import implements
+
+from zExceptions import NotFound
 
 import Products.Five, Globals
 
-class GSRedirect(Products.Five.BrowserView, Traversable):
-    implements(IGSRedirect, ITraversable)
+import logging
+log = logging.getLogger('GSRedirect')
+
+class GSRedirectTraversal(object):
+    implements(IGSRedirectTraversal, IPublishTraverse)
     
     def __init__(self, context, request):
         self.context = context
         self.request = request
-
-        request.form['subpaths'] = []
         
+        self.traverse_subpath = []
+
+    def __call__(self):
+        if self.traverse_subpath:
+            # get a named adapter
+            name = self.traverse_subpath.pop(0)
+            try:
+                return getAdapter(self, IGSRedirect, name=name)()
+            except ComponentLookupError:
+                raise NotFound
+
+        raise NotFound
+
+    def publishTraverse(self, request, name):
+        self.traverse_subpath.append(name)
+
+        return self
+
+class GSMessageRedirectBase(object):
+    implements(IGSRedirect)
+    def __init__(self, traverser):
+        self.context = traverser.context
+        self.request = traverser.request
+        self.traverse_subpath = traverser.traverse_subpath
+
         da = self.context.zsqlalchemy
         assert da, 'No data-adaptor found'
         
         self.messageQuery = queries.MessageQuery(self.context, da)
-      
-    def traverse(self, name, furtherPath):
-        self.request.form['subpaths'].append(name)
-        
-        return self
 
-    def post(self):
-        if len(self.request.form['subpaths']) == 1:
-            postId = self.request.form['subpaths'][0]
+class GSRedirectBase(object):
+    implements(IGSRedirect)
+    def __init__(self, traverser):
+        self.context = traverser.context
+        self.request = traverser.request
+        self.traverse_subpath = traverser.traverse_subpath
+
+class GSRedirectTopic(GSMessageRedirectBase):
+    def __call__(self):
+        if len(self.traverse_subpath) == 1:
+            postId = self.traverse_subpath[0]
+            newPostId = self.messageQuery.post_id_from_legacy_id(postId)
+            if newPostId:
+                postId = newPostId
+            post = self.messageQuery.post(postId)
+            if post:
+                group = self.context.Scripts.get.group_by_id(post['group_id'])
+                if group:
+                    uri = '%s/messages/topic/%s' % (group.absolute_url(),
+                                                    postId)
+                else:
+                    uri = '/r/topic-not-found?id=%s' % postId
+            else: # Cannot find topic
+                uri = '/r/topic-not-found?id=%s' % postId
+        else: # Topic ID not specified
+            uri = '/r/topic-no-id'
+
+        log.info("redirecting to: %s" % uri)
+
+        return self.request.RESPONSE.redirect(uri)
+
+class GSRedirectPost(GSMessageRedirectBase):
+    def __call__(self):
+        if len(self.traverse_subpath) == 1:
+            postId = self.traverse_subpath[0]
             newPostId = self.messageQuery.post_id_from_legacy_id(postId)
             if newPostId:
                 postId = newPostId
@@ -44,34 +99,19 @@ class GSRedirect(Products.Five.BrowserView, Traversable):
                 uri = '/r/post-not-found?id=%s' % postId
         else: # Post ID not specified
             uri = '/r/post-no-id'
-        return self.request.RESPONSE.redirect(uri)
-        
-    def topic(self):
-        if len(self.request.form['subpaths']) == 1:
-            postId = self.request.form['subpaths'][0]
-            newPostId = self.messageQuery.post_id_from_legacy_id(postId)
-            if newPostId:
-                postId = newPostId
-            post = self.messageQuery.post(postId)
-            if post:
-                group = self.context.Scripts.get.group_by_id(post['group_id'])
-                if group:
-                    uri = '%s/messages/topic/%s' % (group.absolute_url(), postId)
-                else:
-                    uri = '/r/topic-not-found?id=%s' % postId
-            else: # Cannot find topic
-                uri = '/r/topic-not-found?id=%s' % postId
-        else: # Topic ID not specified
-            uri = '/r/topic-no-id'
+
+        log.info("redirecting to: %s" % uri)
+
         return self.request.RESPONSE.redirect(uri)
 
-    def file(self):
+class GSRedirectFile(GSRedirectBase):
+    def __call__(self):
         uri = ''
-        if len(self.request.form['subpaths']) == 1:
-            fileId = self.request.form['subpaths'][0]
+        if len(self.traverse_subpath) == 1:
+            fileId = self.traverse_subpath[0]
             fileName = None
-        elif len(self.request.form['subpaths']) == 2:
-            fileId, fileName = self.request.form['subpaths'][0:]            
+        elif len(self.traverse_subpath) == 2:
+            fileId, fileName = self.traverse_subpath[0:]            
         else: # File ID not specified
             uri = '/r/file-no-id'
             fileId = None
@@ -92,8 +132,9 @@ class GSRedirect(Products.Five.BrowserView, Traversable):
         
         return self.request.RESPONSE.redirect(uri)
 
-    def group(self):
-        subpaths = self.request.form['subpaths']
+class GSRedirectGroup(GSRedirectBase):
+    def __call__(self):
+        subpaths = self.traverse_subpath
         if len(subpaths) >= 1:
             groupId = subpaths[0]
             
@@ -119,5 +160,3 @@ class GSRedirect(Products.Five.BrowserView, Traversable):
         else: # Group ID not specified
             uri = '/r/group-no-id'
         return self.request.RESPONSE.redirect(uri)
-
-Globals.InitializeClass( GSRedirect )

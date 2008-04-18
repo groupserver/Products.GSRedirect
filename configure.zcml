@@ -4,13 +4,37 @@
   xmlns:rdb="http://namespaces.zope.org/rdb"
   xmlns:sqlos="http://namespaces.sqlobject.org/sqlos"
   xmlns:five="http://namespaces.zope.org/five">
-  
-  <browser:pages for=".interfaces.IGSRedirectForFolder"
+
+  <adapter for=".interfaces.IGSRedirectTraversal"
+    factory=".view.GSRedirectPost"
+    provides=".interfaces.IGSRedirect"
+    name="post" />
+
+  <adapter for=".interfaces.IGSRedirectTraversal"
+    factory=".view.GSRedirectTopic"
+    provides=".interfaces.IGSRedirect"
+    name="topic" />  
+
+  <adapter for=".interfaces.IGSRedirectTraversal"
+    factory=".view.GSRedirectFile"
+    provides=".interfaces.IGSRedirect"
+    name="file" />  
+
+  <adapter for=".interfaces.IGSRedirectTraversal"
+    factory=".view.GSRedirectGroup"
+    provides=".interfaces.IGSRedirect"
+    name="group" />  
+
+  <browser:page for="Products.GSContent.interfaces.IGSSiteFolder" name="b"
+    class=".view.GSRedirectTraversal"
+    permission="zope2.View" />
+
+<!--  <browser:pages for=".interfaces.IGSRedirectForFolder"
     class=".view.GSRedirect"
     permission="zope2.View">
     <browser:page name="post" attribute="post"/>
     <browser:page name="topic" attribute="topic"/>
     <browser:page name="file" attribute="file"/>
     <browser:page name="group" attribute="group"/>
-  </browser:pages>
+  </browser:pages> -->
 </configure>

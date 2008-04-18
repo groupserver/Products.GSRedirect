@@ -5,6 +5,12 @@ import zope.viewlet.interfaces, zope.contentprovider.interfaces
 from zope.schema import *
 from zope.interface.interface import Interface
 
+class IGSRedirectTraversal(Interface):
+    """ Handle calling the appropriate redirector upon traversal,
+        and pass in the arguments collected.
+
+    """
+
 class IGSRedirect(Interface):
     """Redirector for GroupServer
     
