@@ -25,16 +25,9 @@
     provides=".interfaces.IGSRedirect"
     name="group" />  
 
-  <browser:page for="Products.GSContent.interfaces.IGSSiteFolder" name="b"
+  <!-- Nice short URI -->
+  <browser:page for="Products.GSContent.interfaces.IGSSiteFolder" name="r"
     class=".view.GSRedirectTraversal"
     permission="zope2.View" />
 
-<!--  <browser:pages for=".interfaces.IGSRedirectForFolder"
-    class=".view.GSRedirect"
-    permission="zope2.View">
-    <browser:page name="post" attribute="post"/>
-    <browser:page name="topic" attribute="topic"/>
-    <browser:page name="file" attribute="file"/>
-    <browser:page name="group" attribute="group"/>
-  </browser:pages> -->
 </configure>
