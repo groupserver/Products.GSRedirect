@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  metal:use-macro="context/@@groupserver_site_home_layout/page">
+  <head>
+    <title metal:fill-slot="title">
+      Topic Not Found
+      <span tal:replace="view/siteInfo/get_name">A Site</span>
+    </title>
+    
+  </head>
+  <body metal:fill-slot="body">
+    <h1>Topic Not Found</h1>
+    <p>
+      The topic you were looking for was not found.
+      To find the topic, carry out one of the following.
+    </p>
+    <ul>
+      <li>Check the link you followed, if possible &#8213; especially if
+        it was in an email, as it may be broken over two lines.
+        If the link is broken, fix it by pasting both parts into the 
+        location-bar (also known as the <q>address</q> bar) 
+        of your Web browser.
+      </li>
+      <li>Search for the topic.</li>
+      <li>Browse for an appropriate topic in your
+        <a title="Your Groups" href="/groups">groups</a>.</li>
+    </ul>
+      <p
+        tal:define="sprt python:modules['Products.XWFCore.XWFUtils'].get_support_email;
+          sprtMail python:sprt(view.context, view.siteInfo.get_id())">
+        If you are still having difficulty finding the topic,
+        <a href="#"
+          tal:attributes="href string:mailto:${sprtMail}?subject=Topic Not Found ${view/request/form/id | nothing}"
+          title="Email Support" class="emaillink">please report this 
+          error.</a>
+      </p>
+  </body>
+</html>
+

@@ -71,11 +71,11 @@ class GSRedirectTopic(GSMessageRedirectBase):
                     uri = '%s/messages/topic/%s' % (group.absolute_url(),
                                                     postId)
                 else:
-                    uri = '/r/topic-not-found?id=%s' % postId
+                    uri = '/topic-not-found?id=%s' % postId
             else: # Cannot find topic
-                uri = '/r/topic-not-found?id=%s' % postId
+                uri = '/topic-not-found?id=%s' % postId
         else: # Topic ID not specified
-            uri = '/r/topic-no-id'
+            uri = '/topic-no-id'
 
         log.info("redirecting to: %s" % uri)
 
@@ -94,11 +94,11 @@ class GSRedirectPost(GSMessageRedirectBase):
                 if group:
                     uri = '%s/messages/post/%s' % (group.absolute_url(), postId)
                 else:
-                    uri = '/r/%s?id=%s' % (self.postNotFoundId, postId)
+                    uri = '/post-not-found?id=%s' % postId
             else: # Cannot find post
-                uri = '/r/post-not-found?id=%s' % postId
+                uri = '/post-not-found?id=%s' % postId
         else: # Post ID not specified
-            uri = '/r/post-no-id'
+            uri = '/post-no-id'
 
         log.info("redirecting to: %s" % uri)
 
@@ -128,7 +128,7 @@ class GSRedirectFile(GSRedirectBase):
                 uri = '%s/files/f/%s/%s' % (group.absolute_url(), fileId, 
                                             fileName)
             else:
-                uri = '/r/file-not-found?id=%s' % fileId
+                uri = '/file-not-found?id=%s' % fileId
         
         return self.request.RESPONSE.redirect(uri)
 
@@ -156,7 +156,8 @@ class GSRedirectGroup(GSRedirectBase):
                 group = matchingGroups[0]
                 uri = '%s/%s' % (group.absolute_url(), rest)
             else:
-                uri = '/r/group-not-found?id=%s' % groupId
+                uri = '/group-not-found?id=%s' % groupId
         else: # Group ID not specified
-            uri = '/r/group-no-id'
+            uri = '/group-no-id'
         return self.request.RESPONSE.redirect(uri)
+

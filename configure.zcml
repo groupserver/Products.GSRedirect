@@ -30,4 +30,35 @@
     class=".view.GSRedirectTraversal"
     permission="zope2.View" />
 
+  <!-- "Not Found" pages -->
+  <browser:pages
+    for="Products.GSContent.interfaces.IGSSiteFolder"
+    class="Products.GSContent.view.GSContentView"
+    permission="zope2.View">
+    <browser:page
+      name="topic-not-found"
+      template="browser/templates/no-topic.pt" />
+    <browser:page
+      name="topic-no-id"
+      template="browser/templates/no-topic-id.pt" />
+    <browser:page
+      name="post-not-found"
+      template="browser/templates/no-post.pt" />
+    <browser:page
+      name="post-no-id"
+      template="browser/templates/no-post-id.pt" />
+    <browser:page
+      name="file-not-found"
+      template="browser/templates/no-file.pt" />
+    <browser:page
+      name="file-no-id"
+      template="browser/templates/no-file-id.pt" />
+    <browser:page
+      name="group-not-found"
+      template="browser/templates/no-group.pt" />
+    <browser:page
+      name="group-no-id"
+      template="browser/templates/no-group-id.pt" />
+  </browser:pages>
 </configure>
+

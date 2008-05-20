@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  metal:use-macro="context/@@groupserver_site_home_layout/page">
+  <head>
+    <title metal:fill-slot="title">
+      Group Not Found
+      <span tal:replace="view/siteInfo/get_name">A Site</span>
+    </title>
+    
+  </head>
+  <body metal:fill-slot="body">
+    <h1>Group Not Found</h1>
+      <p
+        tal:define="sprt python:modules['Products.XWFCore.XWFUtils'].get_support_email;
+          sprtMail python:sprt(view.context, view.siteInfo.get_id())">
+        The Group you were looking for was not found.
+        To find the group, try browsing for
+        <a title="Your Groups" href="/groups">youpr groups</a>.
+        If you are still having difficulty finding the group,
+        <a href="#"
+          tal:attributes="href string:mailto:${sprtMail}?subject=Group Not Found ${view/request/form/id | nothing}"
+          title="Email Support" class="emaillink">please report this 
+          error.</a>
+      </p>
+  </body>
+</html>
+
