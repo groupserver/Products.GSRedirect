@@ -8,10 +8,14 @@ from zope.interface import implements
 
 from zExceptions import NotFound
 
+from Products.XWFCore.XWFUtils import get_group_metadata_by_id
+
 import Products.Five, Globals
 
 import logging
 log = logging.getLogger('GSRedirect')
+
+import time
 
 class GSRedirectTraversal(object):
     implements(IGSRedirectTraversal, IPublishTraverse)
@@ -59,6 +63,8 @@ class GSRedirectBase(object):
 
 class GSRedirectTopic(GSMessageRedirectBase):
     def __call__(self):
+        a = time.time()
+
         if len(self.traverse_subpath) == 1:
             postId = self.traverse_subpath[0]
             newPostId = self.messageQuery.post_id_from_legacy_id(postId)
@@ -66,10 +72,11 @@ class GSRedirectTopic(GSMessageRedirectBase):
                 postId = newPostId
             post = self.messageQuery.post(postId)
             if post:
-                group = self.context.Scripts.get.group_by_id(post['group_id'])
-                if group:
-                    uri = '%s/messages/topic/%s' % (group.absolute_url(),
-                                                    postId)
+                group_metadata = get_group_metadata_by_id(self.context, post['group_id'])
+                if group_metadata:
+                    uri = ('/groups/%s/messages/topic/%s' %
+                                                  (post['group_id'],
+                                                   postId))
                 else:
                     uri = '/topic-not-found?id=%s' % postId
             else: # Cannot find topic
@@ -77,7 +84,8 @@ class GSRedirectTopic(GSMessageRedirectBase):
         else: # Topic ID not specified
             uri = '/topic-no-id'
 
-        log.info("redirecting to: %s" % uri)
+        b = time.time()
+        log.info("redirecting to: %s, took %s sec" % (uri, (b-a)))
 
         return self.request.RESPONSE.redirect(uri)
 
@@ -90,9 +98,9 @@ class GSRedirectPost(GSMessageRedirectBase):
                 postId = newPostId
             post = self.messageQuery.post(postId)
             if post:
-                group = self.context.Scripts.get.group_by_id(post['group_id'])
-                if group:
-                    uri = '%s/messages/post/%s' % (group.absolute_url(), postId)
+                group_metadata = get_group_metadata_by_id(self.context, post['group_id'])
+                if group_metadata:
+                    uri = '/groups/%s/messages/post/%s' % (post['group_id'], postId)
                 else:
                     uri = '/post-not-found?id=%s' % postId
             else: # Cannot find post
@@ -122,10 +130,9 @@ class GSRedirectFile(GSRedirectBase):
             if result:
                 file_object = result[0].getObject()
                 groupId = file_object.group_ids[0]
-                group = self.context.Scripts.get.group_by_id(groupId)
             
                 fileName = fileName or file_object.getProperty('title','')
-                uri = '%s/files/f/%s/%s' % (group.absolute_url(), fileId, 
+                uri = '/groups/%s/files/f/%s/%s' % (groupId, fileId, 
                                             fileName)
             else:
                 uri = '/file-not-found?id=%s' % fileId
