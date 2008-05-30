@@ -28,7 +28,7 @@
   <!-- Nice short URI -->
   <browser:page for="Products.GSContent.interfaces.IGSSiteFolder" name="r"
     class=".view.GSRedirectTraversal"
-    permission="zope2.View" />
+    permission="zope2.Public" />
 
   <!-- "Not Found" pages -->
   <browser:pages
