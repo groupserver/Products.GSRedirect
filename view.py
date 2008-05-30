@@ -85,12 +85,13 @@ class GSRedirectTopic(GSMessageRedirectBase):
             uri = '/topic-no-id'
 
         b = time.time()
-        log.info("redirecting to: %s, took %s sec" % (uri, (b-a)))
+        log.info("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
 
         return self.request.RESPONSE.redirect(uri)
 
 class GSRedirectPost(GSMessageRedirectBase):
     def __call__(self):
+        a = time.time()
         if len(self.traverse_subpath) == 1:
             postId = self.traverse_subpath[0]
             newPostId = self.messageQuery.post_id_from_legacy_id(postId)
@@ -108,7 +109,8 @@ class GSRedirectPost(GSMessageRedirectBase):
         else: # Post ID not specified
             uri = '/post-no-id'
 
-        log.info("redirecting to: %s" % uri)
+        b = time.time()
+        log.info("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
 
         return self.request.RESPONSE.redirect(uri)
 
