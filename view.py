@@ -87,7 +87,7 @@ class GSRedirectTopic(GSMessageRedirectBase):
         b = time.time()
         log.info("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
 
-        return self.request.RESPONSE.redirect(uri)
+        return self.request.RESPONSE.redirect(uri, 301)
 
 class GSRedirectPost(GSMessageRedirectBase):
     def __call__(self):
@@ -112,7 +112,7 @@ class GSRedirectPost(GSMessageRedirectBase):
         b = time.time()
         log.info("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
 
-        return self.request.RESPONSE.redirect(uri)
+        return self.request.RESPONSE.redirect(uri, 301)
 
 class GSRedirectFile(GSRedirectBase):
     def __call__(self):
@@ -139,7 +139,7 @@ class GSRedirectFile(GSRedirectBase):
             else:
                 uri = '/file-not-found?id=%s' % fileId
         
-        return self.request.RESPONSE.redirect(uri)
+        return self.request.RESPONSE.redirect(uri, 301)
 
 class GSRedirectGroup(GSRedirectBase):
     def __call__(self):
