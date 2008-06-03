@@ -33,7 +33,7 @@ class GSRedirectTraversal(object):
             try:
                 return getAdapter(self, IGSRedirect, name=name)()
             except ComponentLookupError:
-                raise NotFound
+                raise NotFound("Adapter not found: %s" % name)
 
         raise NotFound
 
