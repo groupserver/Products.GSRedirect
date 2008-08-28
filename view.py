@@ -119,13 +119,14 @@ class GSRedirectFile(GSRedirectBase):
         uri = ''
         if len(self.traverse_subpath) == 1:
             fileId = self.traverse_subpath[0]
-            fileName = None
+            fileAttr = None
         elif len(self.traverse_subpath) == 2:
-            fileId, fileName = self.traverse_subpath[0:]            
+            fileId = self.traverse_subpath[0]
+            fileAttr = '/'.join(self.traverse_subpath[1:])
         else: # File ID not specified
             uri = '/r/file-no-id'
             fileId = None
-            fileName = None
+            fileAttr = None
             
         if not uri:
             result = self.context.FileLibrary2.find_files({'id': fileId})
@@ -133,9 +134,9 @@ class GSRedirectFile(GSRedirectBase):
                 file_object = result[0].getObject()
                 groupId = file_object.group_ids[0]
             
-                fileName = fileName or file_object.getProperty('title','')
+                fileAttr = fileAttr or file_object.getProperty('title','')
                 uri = '/groups/%s/files/f/%s/%s' % (groupId, fileId, 
-                                            fileName)
+                                            fileAttr)
             else:
                 uri = '/file-not-found?id=%s' % fileId
         
