@@ -120,7 +120,7 @@ class GSRedirectFile(GSRedirectBase):
         if len(self.traverse_subpath) == 1:
             fileId = self.traverse_subpath[0]
             fileAttr = None
-        elif len(self.traverse_subpath) == 2:
+        elif len(self.traverse_subpath) >= 2:
             fileId = self.traverse_subpath[0]
             fileAttr = '/'.join(self.traverse_subpath[1:])
         else: # File ID not specified
