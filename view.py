@@ -5,7 +5,7 @@ from Products.XWFMailingListManager import queries
 from interfaces import IGSRedirectTraversal, IGSRedirect
 from zope.publisher.interfaces import IPublishTraverse
 from zope.interface import implements
-
+from OFS.Image import getImageInfo
 from zExceptions import NotFound
 
 from Products.XWFCore.XWFUtils import get_group_metadata_by_id
@@ -140,6 +140,43 @@ class GSRedirectFile(GSRedirectBase):
             else:
                 uri = '/file-not-found?id=%s' % fileId
         
+        return self.request.RESPONSE.redirect(uri, 301)
+
+class GSRedirectImage(GSRedirectBase):
+    def __call__(self):
+        uri = ''
+        if len(self.traverse_subpath) == 1:
+            fileId = self.traverse_subpath[0]
+            fileAttr = None
+        elif len(self.traverse_subpath) >= 2:
+            fileId = self.traverse_subpath[0]
+            fileAttr = '/'.join(self.traverse_subpath[1:])
+        else: # File ID not specified
+            uri = '/r/file-no-id'
+            fileId = None
+            fileAttr = None
+                        
+        if not uri:#URI will be set on error
+            result = self.context.FileLibrary2.find_files({'id': fileId})
+            if result:
+                file_object = result[0].getObject()
+                contentType = getImageInfo(file_object.data)[0]
+                if contentType:#Is an image
+                    groupId = file_object.group_ids[0]
+                
+                    fileAttr = fileAttr or file_object.getProperty('title','')
+                    uri = '/groups/%s/messages/image/%s' % (groupId, fileId)
+                else:
+                    groupId = file_object.group_ids[0]
+                
+                    fileAttr = fileAttr or file_object.getProperty('title','')
+                    uri = '/groups/%s/files/f/%s/%s' % (groupId, fileId, 
+                                                fileAttr)
+            else:
+                uri = '/file-not-found?id=%s' % fileId
+
+        assert type(uri) == str
+        assert uri
         return self.request.RESPONSE.redirect(uri, 301)
 
 class GSRedirectGroup(GSRedirectBase):

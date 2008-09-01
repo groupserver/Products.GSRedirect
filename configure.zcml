@@ -21,6 +21,11 @@
     name="file" />  
 
   <adapter for=".interfaces.IGSRedirectTraversal"
+    factory=".view.GSRedirectImage"
+    provides=".interfaces.IGSRedirect"
+    name="img" />  
+
+  <adapter for=".interfaces.IGSRedirectTraversal"
     factory=".view.GSRedirectGroup"
     provides=".interfaces.IGSRedirect"
     name="group" />  
