@@ -19,7 +19,7 @@
           sprtMail python:sprt(view.context, view.siteInfo.get_id())">
         The Group you were looking for was not found.
         To find the group, try browsing for
-        <a title="Your Groups" href="/groups">youpr groups</a>.
+        <a title="Your Groups" href="/groups">your groups</a>.
         If you are still having difficulty finding the group,
         <a href="#"
           tal:attributes="href string:mailto:${sprtMail}?subject=Group Not Found ${view/request/form/id | nothing}"
