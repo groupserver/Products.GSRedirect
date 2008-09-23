@@ -175,7 +175,7 @@ class GSRedirectImage(GSRedirectBase):
             else:
                 uri = '/file-not-found?id=%s' % fileId
 
-        assert type(uri) == str
+        #assert type(uri) == str
         assert uri
         return self.request.RESPONSE.redirect(uri, 301)
 
