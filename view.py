@@ -74,7 +74,6 @@ class GSRedirectTopic(GSMessageRedirectBase):
             if post:
                 try:
                     site_root = self.context.site_root()
-                    print post
                     s = getattr(site_root.Content, post['site_id'])
                     g = getattr(s.groups, post['group_id'])
                 except AttributeError, e:
