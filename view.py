@@ -72,13 +72,17 @@ class GSRedirectTopic(GSMessageRedirectBase):
                 postId = newPostId
             post = self.messageQuery.post(postId)
             if post:
-                group_metadata = get_group_metadata_by_id(self.context, post['group_id'])
-                if group_metadata:
+                try:
+                    site_root = self.context.site_root()
+                    print post
+                    s = getattr(site_root.Content, post['site_id'])
+                    g = getattr(s.groups, post['group_id'])
+                except AttributeError, e:
+                    uri = '/topic-not-found?id=%s' % postId
+                else:
                     uri = ('/groups/%s/messages/topic/%s' %
                                                   (post['group_id'],
                                                    postId))
-                else:
-                    uri = '/topic-not-found?id=%s' % postId
             else: # Cannot find topic
                 uri = '/topic-not-found?id=%s' % postId
         else: # Topic ID not specified
