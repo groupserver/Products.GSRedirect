@@ -88,7 +88,7 @@ class GSRedirectTopic(GSMessageRedirectBase):
             uri = '/topic-no-id'
 
         b = time.time()
-        log.info("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
+        log.debug("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
 
         return self.request.RESPONSE.redirect(uri, 301)
 
@@ -113,7 +113,7 @@ class GSRedirectPost(GSMessageRedirectBase):
             uri = '/post-no-id'
 
         b = time.time()
-        log.info("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
+        log.debug("redirecting to: %s, took %.2f ms" % (uri, (b-a)*1000.0))
 
         return self.request.RESPONSE.redirect(uri, 301)
 
