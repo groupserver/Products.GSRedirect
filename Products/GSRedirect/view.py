@@ -1,7 +1,7 @@
 '''GroupServer Page-Redirector
 '''
 from zope.component import getMultiAdapter, getAdapter, ComponentLookupError
-from Products.XWFMailingListManager import queries
+from Products.XWFMailingListManager.queries import MessageQuery
 from interfaces import IGSRedirectTraversal, IGSRedirect
 from zope.publisher.interfaces import IPublishTraverse
 from zope.interface import implements
@@ -52,7 +52,7 @@ class GSMessageRedirectBase(object):
         da = self.context.zsqlalchemy
         assert da, 'No data-adaptor found'
         
-        self.messageQuery = queries.MessageQuery(self.context, da)
+        self.messageQuery = MessageQuery(self.context, da)
 
 class GSRedirectBase(object):
     implements(IGSRedirect)
