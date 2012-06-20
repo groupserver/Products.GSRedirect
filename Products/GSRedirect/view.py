@@ -48,11 +48,8 @@ class GSMessageRedirectBase(object):
         self.context = traverser.context
         self.request = traverser.request
         self.traverse_subpath = traverser.traverse_subpath
-
-        da = self.context.zsqlalchemy
-        assert da, 'No data-adaptor found'
         
-        self.messageQuery = MessageQuery(self.context, da)
+        self.messageQuery = MessageQuery(self.context)
 
 class GSRedirectBase(object):
     implements(IGSRedirect)
