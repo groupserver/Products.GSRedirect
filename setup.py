@@ -25,6 +25,7 @@ setup(name='Products.GSRedirect',
       zip_safe=False,
       install_requires=[
           'setuptools',
+          'Products.GSContent',
           'Products.XWFMailingListManager',
           # -*- Extra requirements: -*-
       ],
