@@ -15,15 +15,23 @@
 from __future__ import absolute_import, unicode_literals
 import logging
 log = logging.getLogger('GSRedirect')
-import time
+from time import time
+from zope.cachedescriptors.property import Lazy
 from zope.component import getAdapter, ComponentLookupError
-from Products.XWFMailingListManager.queries import MessageQuery
-from zope.publisher.interfaces import IPublishTraverse
 from zope.interface import implements
-from OFS.Image import getImageInfo
+from zope.publisher.interfaces import IPublishTraverse
 from zExceptions import NotFound
-from Products.XWFCore.XWFUtils import get_group_metadata_by_id
+from Products.XWFFileLibrary2.queries import FileQuery
+from Products.XWFMailingListManager.queries import MessageQuery
 from .interfaces import IGSRedirectTraversal, IGSRedirect
+
+
+def to_ascii(u):
+    if type(u) == unicode:
+        retval = u.encode('ascii', 'ignore')
+    else:
+        retval = u
+    return retval
 
 
 class GSRedirectTraversal(object):
@@ -60,7 +68,10 @@ class GSMessageRedirectBase(object):
         self.request = traverser.request
         self.traverse_subpath = traverser.traverse_subpath
 
-        self.messageQuery = MessageQuery(self.context)
+    @Lazy
+    def messageQuery(self):
+        retval = MessageQuery(self.context)
+        return retval
 
 
 class GSRedirectBase(object):
@@ -74,7 +85,7 @@ class GSRedirectBase(object):
 
 class GSRedirectTopic(GSMessageRedirectBase):
     def __call__(self):
-        a = time.time()
+        a = time()
 
         if len(self.traverse_subpath) == 1:
             postId = self.traverse_subpath[0]
@@ -98,15 +109,15 @@ class GSRedirectTopic(GSMessageRedirectBase):
         else:  # Topic ID not specified
             uri = '/topic-no-id'
 
-        b = time.time()
+        b = time()
         log.debug("redirecting to: %s, took %.2f ms" % (uri, (b - a) * 1000.0))
 
-        return self.request.RESPONSE.redirect(uri, 301)
+        return self.request.RESPONSE.redirect(to_ascii(uri), 301)
 
 
 class GSRedirectPost(GSMessageRedirectBase):
     def __call__(self):
-        a = time.time()
+        a = time()
         if len(self.traverse_subpath) == 1:
             postId = self.traverse_subpath[0]
             newPostId = self.messageQuery.post_id_from_legacy_id(postId)
@@ -114,89 +125,73 @@ class GSRedirectPost(GSMessageRedirectBase):
                 postId = newPostId
             post = self.messageQuery.post(postId)
             if post:
-                group_metadata = get_group_metadata_by_id(self.context,
-                                                        post['group_id'])
-                if group_metadata:
-                    uri = '/groups/%s/messages/post/%s' % (post['group_id'],
-                                                            postId)
-                else:
-                    uri = '/post-not-found?id=%s' % postId
+                uri = '/groups/%s/messages/post/%s' % (post['group_id'], postId)
             else:  # Cannot find post
                 uri = '/post-not-found?id=%s' % postId
         else:  # Post ID not specified
             uri = '/post-no-id'
 
-        b = time.time()
+        b = time()
         log.debug("redirecting to: %s, took %.2f ms" % (uri, (b - a) * 1000.0))
 
-        return self.request.RESPONSE.redirect(uri, 301)
+        return self.request.RESPONSE.redirect(to_ascii(uri), 301)
 
 
 class GSRedirectFile(GSRedirectBase):
+
+    @Lazy
+    def fileQuery(self):
+        retval = FileQuery()
+        return retval
+
     def __call__(self):
         uri = ''
         if len(self.traverse_subpath) == 1:
             fileId = self.traverse_subpath[0]
-            fileAttr = None
         elif len(self.traverse_subpath) >= 2:
             fileId = self.traverse_subpath[0]
-            fileAttr = '/'.join(self.traverse_subpath[1:])
         else:  # File ID not specified
             uri = '/r/file-no-id'
             fileId = None
-            fileAttr = None
-
-        if not uri:
-            result = self.context.FileLibrary2.find_files({'id': fileId})
-            if result:
-                file_object = result[0].getObject()
-                groupId = file_object.group_ids[0]
-
-                fileAttr = fileAttr or file_object.getProperty('title', '')
-                uri = '/groups/%s/files/f/%s/%s' % (groupId, fileId,
-                                            fileAttr)
-            else:
-                uri = '/file-not-found?id=%s' % fileId
-
-        return self.request.RESPONSE.redirect(uri, 301)
-
-
-class GSRedirectImage(GSRedirectBase):
-    def __call__(self):
-        uri = ''
-        if len(self.traverse_subpath) == 1:
-            fileId = self.traverse_subpath[0]
-            fileAttr = None
-        elif len(self.traverse_subpath) >= 2:
-            fileId = self.traverse_subpath[0]
-            fileAttr = '/'.join(self.traverse_subpath[1:])
-        else:  # File ID not specified
-            uri = '/r/file-no-id'
-            fileId = None
-            fileAttr = None
 
         if not uri:  # URI will be set on error
-            result = self.context.FileLibrary2.find_files({'id': fileId})
-            if result:
-                file_object = result[0].getObject()
-                contentType = getImageInfo(file_object.data)[0]
-                if contentType:  # Is an image
-                    groupId = file_object.group_ids[0]
-
-                    fileAttr = fileAttr or file_object.getProperty('title', '')
-                    uri = '/groups/%s/messages/image/%s' % (groupId, fileId)
-                else:
-                    groupId = file_object.group_ids[0]
-
-                    fileAttr = fileAttr or file_object.getProperty('title', '')
-                    uri = '/groups/%s/files/f/%s/%s' % (groupId, fileId,
-                                                fileAttr)
-            else:
+            fileInfo = self.fileQuery.file_info(fileId)
+            if fileInfo is None:
                 uri = '/file-not-found?id=%s' % fileId
+            else:
+                u = '/groups/{group_id}/files/f/{file_id}/{name}'
+                uri = u.format(**fileInfo)
+
+        return self.request.RESPONSE.redirect(to_ascii(uri), 301)
+
+
+class GSRedirectImage(GSRedirectFile):
+
+    def __call__(self):
+        uri = ''
+        if len(self.traverse_subpath) == 1:
+            fileId = self.traverse_subpath[0]
+        elif len(self.traverse_subpath) >= 2:
+            fileId = self.traverse_subpath[0]
+        else:  # File ID not specified
+            uri = '/r/file-no-id'
+            fileId = None
+
+        if not uri:  # URI will be set on error
+            fileInfo = self.fileQuery.file_info(fileId)
+            if fileInfo is None:
+                uri = '/file-not-found?id=%s' % fileId
+            else:
+                if 'image/' in fileInfo['mime_type']:  # Is an image
+                    u = '/groups/{group_id}/messages/image/{file_id}'
+                    uri = u.format(**fileInfo)
+                else:
+                    u = '/groups/{group_id}/files/f/{file_id}/{file_name}'
+                    uri = u.format(**fileInfo)
 
         #assert type(uri) == str
         assert uri
-        return self.request.RESPONSE.redirect(uri, 301)
+        return self.request.RESPONSE.redirect(to_ascii(uri), 301)
 
 
 class GSRedirectGroup(GSRedirectBase):
@@ -215,7 +210,7 @@ class GSRedirectGroup(GSRedirectBase):
             cs = self.context.Scripts
             groupMemberships = cs.get.group_memberships(groups)
             allGroups = []
-            for groupType in groupMemberships.keys():
+            for groupType in groupMemberships:
                 allGroups = allGroups + groupMemberships[groupType]
 
             matchingGroups = [g.getId() for g in allGroups]
