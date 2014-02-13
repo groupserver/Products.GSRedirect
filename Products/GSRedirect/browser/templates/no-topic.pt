@@ -27,11 +27,11 @@
         <a title="Your Groups" href="/groups">groups</a>.</li>
     </ul>
       <p
-        tal:define="sprtMail view/siteInfo/get_support_email;
-                    formId view/request/form/id | nothing">
+        tal:define="sprt python:modules['Products.XWFCore.XWFUtils'].get_support_email;
+          sprtMail python:sprt(view.context, view.siteInfo.get_id())">
         If you are still having difficulty finding the topic,
         <a href="#"
-          tal:attributes="href string:mailto:${sprtMail}?subject=Topic Not Found ${formId}"
+           tal:attributes="href python:'mailto:%s?subject=Topic Not Found %s' % (sprtMail, view.request.form.get('id',''))"
           title="Email Support" class="emaillink">please report this 
           error.</a>
       </p>

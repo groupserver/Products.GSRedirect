@@ -19,7 +19,7 @@
         <a title="Your Groups" href="/groups">your groups</a>.
         If you are still having difficulty finding the group,
         <a href="#"
-          tal:attributes="href string:mailto:${sprtMail}?subject=Group Not Found ${view/request/form/id | nothing}"
+           tal:attributes="href python:'mailto:%s?subject=Group Not Found %s' % (sprtMail, view.request.form.get('id',''))"
           title="Email Support" class="emaillink">please report this 
           error.</a>
       </p>

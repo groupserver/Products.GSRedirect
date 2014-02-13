@@ -31,7 +31,7 @@
           sprtMail python:sprt(view.context, view.siteInfo.get_id())">
         If you are still having difficulty finding the post,
         <a href="#"
-          tal:attributes="href string:mailto:${sprtMail}?subject=File Post Found ${view/request/form/id | nothing}"
+           tal:attributes="href python:'mailto:%s?subject=Post Not Found %s' % (sprtMail, view.request.form.get('id',''))"
           title="Email Support" class="emaillink">please report this 
           error.</a>
       </p>
