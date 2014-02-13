@@ -1,39 +1,55 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Copyright © 2013 OnlineGroups.net and Contributors. -->
+<!-- All Rights Reserved. -->
+
+<!-- This software is subject to the provisions of the Zope Public -->
+<!-- License, Version 2.1 (ZPL).  A copy of the ZPL should accompany this -->
+<!-- distribution. -->
+
+<!-- THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED -->
+<!-- WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED -->
+<!-- WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND -->
+<!-- FITNESS FOR A PARTICULAR PURPOSE. -->
 <configure xmlns="http://namespaces.zope.org/zope"
-  xmlns:browser="http://namespaces.zope.org/browser"
-  xmlns:rdb="http://namespaces.zope.org/rdb"
-  xmlns:sqlos="http://namespaces.sqlobject.org/sqlos"
-  xmlns:five="http://namespaces.zope.org/five">
+           xmlns:browser="http://namespaces.zope.org/browser"
+           i18n_domain="groupserver">
 
-  <adapter for=".interfaces.IGSRedirectTraversal"
-    factory=".view.GSRedirectPost"
-    provides=".interfaces.IGSRedirect"
-    name="post" />
+  <!-- Nice short URI -->
+  <browser:page
+    name="r"
+    for="Products.GSContent.interfaces.IGSSiteFolder"
+    class=".view.GSRedirectTraversal"
+    permission="zope2.Public" />
 
-  <adapter for=".interfaces.IGSRedirectTraversal"
-    factory=".view.GSRedirectTopic"
+  <!-- Specific adaptors -->
+  <adapter
+    name="post"
+    for=".interfaces.IGSRedirectTraversal"
     provides=".interfaces.IGSRedirect"
-    name="topic" />  
+    factory=".view.GSRedirectPost" />
+
+  <adapter
+    name="topic"
+    for=".interfaces.IGSRedirectTraversal"
+    provides=".interfaces.IGSRedirect"
+    factory=".view.GSRedirectTopic" />
 
   <adapter for=".interfaces.IGSRedirectTraversal"
     factory=".view.GSRedirectFile"
     provides=".interfaces.IGSRedirect"
-    name="file" />  
+    name="file" />
 
-  <adapter for=".interfaces.IGSRedirectTraversal"
-    factory=".view.GSRedirectImage"
+  <adapter
+    name="img"
+    for=".interfaces.IGSRedirectTraversal"
     provides=".interfaces.IGSRedirect"
-    name="img" />  
+    factory=".view.GSRedirectImage" />
 
-  <adapter for=".interfaces.IGSRedirectTraversal"
-    factory=".view.GSRedirectGroup"
+  <adapter
+    name="group"
+    for=".interfaces.IGSRedirectTraversal"
     provides=".interfaces.IGSRedirect"
-    name="group" />  
-
-  <!-- Nice short URI -->
-  <browser:page for="Products.GSContent.interfaces.IGSSiteFolder" name="r"
-    class=".view.GSRedirectTraversal"
-    permission="zope2.Public" />
+    factory=".view.GSRedirectGroup" />
 
   <!-- "Not Found" pages -->
   <browser:pages
@@ -66,4 +82,3 @@
       template="browser/templates/no-group-id.pt" />
   </browser:pages>
 </configure>
-
