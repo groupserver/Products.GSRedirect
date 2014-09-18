@@ -26,7 +26,7 @@ with codecs.open(os.path.join("docs", "HISTORY.rst"),
 version = get_version()
 setup(name='Products.GSRedirect',
       version=version,
-      description="",
+      description="The /r/ system for GroupServer",
       long_description=long_description,
       classifiers=[
         'Development Status :: 5 - Production/Stable',
